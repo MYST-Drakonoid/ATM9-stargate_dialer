@@ -5,6 +5,10 @@ DISCLAIMER: I AM NOT A PROFESSIONAL PROGRAMMER, I JUST WANT TO SHARE MY PROJECT
 NOTE: THE WIRELESS DIAL PROGRAM IS STILL IN PROGRESS YOU MIGHT HAVE TO MODIFY THE GATES THAT I HAVE SETUP TO YOURS IN THE MEANTIME
 
 
+
+
+
+
 TOUCH SCREEN GATE DIALING MONITOR
 
 requirements for a milky way gate are as follows:
@@ -14,9 +18,9 @@ requirements for a milky way gate are as follows:
     - Advanced monitor 3x3 or taller
     - attachment via wired modem
 
-    you need to update the gate addresses in the beginning of the code in the format of (make sure the last number is always zero(0)) 7, 8, and 9 chevron addresses are viable for gates
+you need to update the gate addresses in the beginning of the code in the format of (make sure the last number is always zero(0)) 7, 8, and 9 chevron addresses are viable for gates
 
-            {"gatename",    1,1,1,1,1,1,0} --gatename not required here but can make it easier to read
+        {"gatename",    1,1,1,1,1,1,0} --gatename not required here but can make it easier to read
 
     
 
