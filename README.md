@@ -55,7 +55,7 @@ WARNING: misdialing gates causes the program to break you need to restart the pr
 
 WIRELESS GATES
 
-setting up a wireless gate is a bit mor expensive for all gates. here is what you need:
+setting up a wireless gate is a bit more expensive for all gates. here is what you need:
 
     - advanced WIRELESS pocket computer
     - basic computer
