@@ -18,22 +18,28 @@ requirements for a milky way gate are as follows:
 
             {"gatename",    1,1,1,1,1,1,0} --gatename not required here but can make it easier to read
 
-    it should look like this:
+    
+
+it should look like this:
+
+
 ![milkyway setup](descpics/milkyway_example.png)
 
-    the only difference whith other gates is that you need to have an avanced crystal interface to work with the gates (including pegasus, tollan, classic and universe gates)
+    the only difference whith other gates is that you need to have an
+    avanced crystal interface to work with the gates (including pegasus, tollan, classic and universe gates)
 
-    looking like this:
+looking like this:
+
 ![advanced setup](descpics/advanced_example.png)
 
 note: to disconnect stargate: just rightclick the screen once the wormhole is connected
 
 in the config there are four lists for your use:
 
--- MAIN GATES for those gates that are mostly dialled with 7 chevron addresses
--- player gates for those gates that are direct dialing other players bases (mostly 9 cheveron addresses)
--- hazard gates for gates that are hostile on the destination
--- private 9 cheveron gates for specific players
+    -- MAIN GATES for those gates that are mostly dialled with 7 chevron addresses
+    -- player gates for those gates that are direct dialing other players bases (mostly 9 cheveron addresses)
+    -- hazard gates for gates that are hostile on the destination
+    -- private 9 cheveron gates for specific players
 
 you are welcome to just use the first list only  but you may run out of room quickly as i havent figured out how to do continued pages as of yet
 
