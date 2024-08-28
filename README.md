@@ -25,8 +25,8 @@ it should look like this:
 
 ![milkyway setup](descpics/milkyway_example.png)
 
-    the only difference whith other gates is that you need to have an
-    avanced crystal interface to work with the gates (including pegasus, tollan, classic and universe gates)
+the only difference whith other gates is that you need to have an
+avanced crystal interface to work with the gates (including pegasus, tollan, classic and universe gates)
 
 looking like this:
 
