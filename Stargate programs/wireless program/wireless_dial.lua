@@ -1,66 +1,53 @@
+--update this to change how fast the gate dials on non universe or manualy dialing milky way gates--
 local gatespeed = .5
 
+-- update these settings to change which types of gates this SG/TERMINAL can access
+local canAccessPrivateGates = true
+local canAccessHazardGates = true
+
+-- four gate catagories , MAIN GATES for those gates that are mostly dialled with 7 chevron addresses
+-- player gates for those gates that are direct dialing other players bases (mostly 9 cheveron addresses)
+-- hazard gates for gates that are hostile on the destination
+-- private 9 cheveron gates for specific players
+
+-- Main Gate Addresses
+local MainGates = {
+    {"OVERWORLD",   27,25,4,35,10,28,0},           --overworld
+    {"Nether",      27,23,4,34,12,28,0},           --theNether
+    {"End",         13,24,2,19,3,30,0},            --theEnd
+    {"Abidos",      26,6,14,31,11,29,0},           --abidos
+    {"Chulak",      8,1,22,14,36,19,0}             --chulak
+}
+
+-- player gate addresses
+local playerGates = {
+}
+
+-- hazard gate addresses
+local hazardGates = {
+}
+
+-- personal gate addresses
+local privateGates = {
+
+}
 
 
 
---gate addresses
-local gateTable = {
-    {27,25,4,35,10,28,0},           --overworld
-    {27,23,4,34,12,28,0},           --theNether
-    {13,24,2,19,3,30,0},            --theEnd
-    {26,6,14,31,11,29,0},           --abidos
-    {8,1,22,14,36,19,0},            --chulak
-    {26,20,4,36,9,27,0},            --glacio
-    {34,14,25,35,17,33,0},          --theOther
-    {21,22,5,11,20,27,0},           --theBeyond
-    {10,9,6,28,21,35,0},            --theAether
-    {20,10,26,5,18,3,0},            --voidscape
-    {26,28,13,33,7,35,0},           --twiforest
-    {16,7,9,29,5,1,0},              --miningdim
-    {8,16,7,25,19,30,0},            --everbright
-    {23,11,21,10,26,31,0},          --otherSide
-    {25,34,29, 30,5,15,0},          --marble
-    {25,5,32,35,23,2,0},            --lostCity
-    {18,20,1,15,14,7,19,0},         --lanteaAddress
-    {11,13,2,34,25,3,28,1,0},       --MYSTAJ
-    {33,16,25,7,23,9,34,4,0},        --magicINC
-    {32,27,30,26,3,12,33,2,0},      --Asteria
-    {33,18,28,15,22,16,9,13,0},     --moon
-    {6,8,25,28,33,12,30,35,0},      --mars
-    {34,17,21,6,15,27,5,30,0},      --venus
-    {23,4,18,5,31,1,2,22,0}}        --mercury     
---22
-local buttonXY = {}
+-------------------------------------------------------------------------------------------------------------
+-----------DONT FIDDLE WITH ANYTHING BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING----------------------
+-------------------------------------------------------------------------------------------------------------
 
-local screenNames = {
-    "SPAWN",
-    "Nether",
-    "End",
-    "Abidos",
-    "Chulak",
-    "Glacio",
-    "Other",
-    "Beyond",
-    "Aether",
-    "Void",
-    "T forest",
-    "Mining",
-    "Everbri",
-    "otherSide",
-    "marble",
-    "lostCity",
-    "Atlantis",
-    "MYST&AJ",
-    "magicINC",
-    "Asteria",
-    "Moon",
-    "mars",
-    "Venus",
-    "Mercury"
-    }
---22
+
+
+
+-- 26x20
 
 modem = peripheral.find("modem")
+
+local buttonXY = {}
+local computerAddresses = {}
+local computerNames = {}
 local gate = nil
 
 local pComp = nil
@@ -70,12 +57,34 @@ local selAdress = nil
 local _,_,_,reply,signal,_ = nil,nil,nil,nil,nil,nil
 local symbol = ""
 
-function pararecieve()
+
+
+local function pararecieve()
     _,_,_,reply,signal,_ = os.pullEvent("modem_message")
     return 1
 end
 
-function recieveDial() --computer end: recieves address request and dials gate this also waits for disconnect command
+local function paraShutdown()
+    _,_,_,reply,signal,_ = os.pullEvent("modem_message")
+    if signal == 100 then
+        redstone.setOutput("front",false)
+        gate.disconnectStargate()
+    end
+end
+
+local function DisconnectCheck() -- does exactly what you think it does (if an unexpected error is thrown this siezes the program too)
+    
+    local disCode = os.pullEvent("stargate_disconnected")
+    if (disCode ~= 7 or 8 or 9 or 10 or -1 or -15 or -16 or -19 or "stargate_disconnected") then
+            redstone.setOutput("front",false)
+            print(disCode)
+            modem.transmit(8750,1327,1000)
+        
+    end
+    return 2
+end
+
+local function recieveDial() --computer end: recieves address request and dials gate this also waits for disconnect command
     print("opening channel")
     
 
@@ -89,21 +98,34 @@ function recieveDial() --computer end: recieves address request and dials gate t
 
     modem.open(1327)
     modem.transmit(8750,1327,"dialing complete")
-    _,_,_,reply,signal,_ = os.pullEvent("modem_message")
-    if signal == 100 then
-        redstone.setOutput("front",false)
-        gate.disconnectStargate()
+    local Rcheck = parallel.waitForAny(paraShutdown, DisconnectCheck)
+
+    if Rcheck == 2 then
+        modem.transmit(8750,1327,1000)
     end
+
 end
 
-function TermDraw() --tables side: draws selection options on the terminal
+local function GetClick() -- gets click information
+    
+    local event, _, xPos, yPos = os.pullEvent("monitor_touch")
+    return xPos, yPos
+end
+
+local function TermDraw(list, color) --tables side: draws selection options on the terminal
     local x = 0
-    local y = 0
+    local y = 1
     local x1 = 0
     local x2 = 0
+    term.setBackgroundColor(colors.black)
     term.clear()
-    term.setBackgroundColor(colors.green)
-    for i = 1,#screenNames do
+    term.setBackgroundColor(color)
+
+
+
+    for i = 1,#list do
+        local internaladdress = {}
+
         if i % 2 == 0 then
             x = 15
         else
@@ -112,48 +134,104 @@ function TermDraw() --tables side: draws selection options on the terminal
         end
         term.setCursorPos(x,y)
 
-        if screenNames[i] == "Moon" then
-            term.setBackgroundColor(colors.red)
-        end
-        term.write(screenNames[i])
+        term.write(list[i])
 
         x1 = x
         x2 = x + 9
 
         table.insert(buttonXY, {x1,x2,y})
+
+        table.insert(computerNames, list[i][1])
+
+        local addresstranslate = list[i]
+        for i = 2, #addresstranslate do 
+            table.insert(internaladdress, addresstranslate[i])
+        end
+        table.insert(computerAddresses, internaladdress)
+        internaladdress = {}
     end
+
+    paintutils.drawFilledBox(20,17,26,19,colors.red)
+    term.setCursorPos(21,18)
+    term.write("Back")
 
 end
 
-function SelectSend() --tablest side: gets input and trnasmits selected gate request to computer
+local function selectionTabs()
+    term.setBackgroundColor(colors.black)
+    term.clear()
+    
+
+    if #MainGates ~= 0 then
+        paintutils.drawFilledBox(2,3,14,7,colors.purple)
+        term.setCursorPos(3,5)
+        term.setBackgroundColor(colors.purple)
+        term.write("Main Gates")
+    end
+
+    if #playerGates ~= 0 then
+        paintutils.drawFilledBox(16,3,28,7,colors.green)
+        term.setCursorPos(19,4)
+        term.setBackgroundColor(colors.green)
+        term.write("Player")
+        term.setCursorPos(18,6)
+        term.write("Base gates")
+    end
+
+    if (#hazardGates ~= 0) and (canAccessHazardGates == true) then
+        paintutils.drawFilledBox(2,9,14,13,colors.red)
+        term.setCursorPos(4,10)
+        term.setBackgroundColor(colors.red)
+        term.write("Hazard")
+        term.setCursorPos(4,12)
+        term.write("Gates")
+    end
+
+    if (#privateGates ~= 0) and (canAccessPrivateGates == true) then
+        paintutils.drawFilledBox(16,9,28,13,colors.blue)
+        term.setCursorPos(18,10)
+        term.setBackgroundColor(colors.blue)
+        term.write("Private")
+        term.setCursorPos(18,12)
+        term.write("gates")
+    end
+
+    
+end
+
+local function SelectSend() --tablest side: gets input and trnasmits selected gate request to computer
     local dialing = false
-    local _, _, cursX, cursY = os.pullEvent("mouse_click")
+    local selecting = true
+
     term.setBackgroundColor(colors.black)
     term.clear()
 
-    
-    while dialing == false do
+
+    while dialing == false and selecting == true do
+
         for i = 1, #buttonXY do
+
+            local cursX, cursY = GetClick()
+
             if (cursY == buttonXY[i][3]) and ((cursX >= buttonXY[i][1]) and (cursX <= buttonXY[i][2])) then
                 dialing = true
                 modem.open(8750)
-                modem.transmit(1327, 8750, gateTable[i])
+                modem.transmit(1327, 8750, computerAddresses[i])
                 term.setCursorPos(10,10)
                 term.write("dialing gate")
                 local _,_,_,_,dialreply,_ = os.pullEvent("modem_message")
                 term.clear()
                 term.write(dialreply)
-                selAdress = screenNames[i]
+                selAdress = computerNames[i]
                 sleep(5)
                 cursX = 0
                 cursY= 0
-
-                
-                
+            elseif cursY >= 17 and cursX >= 20 then
+                selecting = false
             end
-        
         end
     end
+    return dialing
 end
 
 function Dial(address) --computer side:borrowed code to dial the gate. credit: Povstalec
@@ -272,44 +350,172 @@ function Dial(address) --computer side:borrowed code to dial the gate. credit: P
     end
 end
 
-function termDisconnect() --tablet side: sends dissconect code to computer
+local function termDisconnect() --tablet side: sends dissconect code to computer
+    local intcheck = true
+
+
     term.setBackgroundColor(colors.green)
     term.clear()
     term.setCursorPos(8,8)
     term.write(selAdress)
-    os.pullEvent("mouse_click")
-    modem.transmit(1327, 8750, 100)
-    term.setBackgroundColor(colors.black)
-    term.clear()
-    term.setCursorPos(4,8)
-    term.write("disconnected")
-    sleep(4)
+    while intcheck == true do
+        local Rcheck = parallel.waitForAny(GetClick, pararecieve)
+
+        if Rcheck == 1 then
+            modem.transmit(1327, 8750, (100))
+            intcheck = false
+            term.setBackgroundColor(colors.black)
+            term.clear()
+            term.setCursorPos(4,8)
+            term.write("disconnected")
+            sleep(1.5)
+        elseif (Rcheck == 2) and (signal == 1000) then
+            intcheck = false
+            term.setBackgroundColor(colors.black)
+            term.clear()
+            term.setCursorPos(4,8)
+            term.write("disconnected")
+            sleep(1.5)
+        end
+    end
 end
 
-function DisconnectCheck() -- does exactly what you think it does (if an unexpected error is thrown this siezes the program too)
+local function DisconnectCheck() -- does exactly what you think it does (if an unexpected error is thrown this siezes the program too)
     
     local disCode = os.pullEvent("stargate_disconnected")
     if (disCode ~= 7 or 8 or 9 or 10 or -1 or -15 or -16 or -19 or "stargate_disconnected") then
             redstone.setOutput("front",false)
             print(disCode)
+            modem.transmit(8750,1327,1000)
         
     end
     return 2
 end
 
-function timeout() 
+local function timeout() 
     sleep(300)
     return 1
     
 end
 
-function PassthroughDisconnect()
+local function PassthroughDisconnect()
     os.pullEvent("stargate_reconstructing_entity")
     sleep(20)
     local gatecheck2 = gate.isStargateConnected()
     if gatecheck2 == true then
 
         gate.disconnectStargate()
+        modem.transmit(8750,1327,1000)
+    end
+    return 1
+end
+
+local function tabSelector()
+    
+
+    local state = true
+    
+    
+    while state == true do
+        term.setBackgroundColor(colors.black)
+        term.clear()
+        
+        selectionTabs()
+
+        local tabx, taby = GetClick()
+
+        local count = 0
+
+        if (taby >= 2) and (taby <= 7) and ((tabx >= 2) and (tabx <= 14)) then
+
+            if #MainGates ~= 0 then
+                term.setBackgroundColor(colors.black)
+                term.clear()
+
+                TermDraw(MainGates, colours.purple)
+
+                local returnstate = SelectSend()
+
+                if returnstate == true then
+                    state = false
+                end
+
+                computerAddresses = {}
+                computerNames = {}
+            else
+                term.setCursorPos(9,7)
+                term.clear()
+                term.write("no gates available")
+                sleep(5)
+            end
+
+        elseif (taby >= 3) and (taby <= 7) and ((tabx >= 16) and (tabx <= 28)) then
+
+            if #playerGates ~= 0 then
+                term.setBackgroundColor(colors.black)
+                term.clear()
+
+                TermDraw(playerGates, colours.green)
+
+                local returnstate = SelectSend()
+
+                if returnstate == true then
+                    state = false
+                end
+
+                computerAddresses = {}
+                computerNames = {}
+            else
+                term.setCursorPos(9,7)
+                term.clear()
+                term.write("no gates available")
+                sleep(5)
+            end
+
+        elseif (((taby >= 9) and (taby <= 13)) and ((tabx >= 2) and (tabx <= 14))) and (canAccessHazardGates == true) then
+            if (#hazardGates ~= 0) and (canAccessHazardGates == true) then
+                term.setBackgroundColor(colors.black)
+                term.clear()
+
+                TermDraw(hazardGates, colours.red)
+
+                local returnstate = SelectSend()
+
+                if returnstate == true then
+                    state = false
+                end
+
+                computerAddresses = {}
+                computerNames = {}
+            else
+                term.setCursorPos(9,7)
+                term.clear()
+                term.write("no gates available")
+                sleep(5)
+            end
+
+        elseif (((taby >= 9) and (taby <= 13)) and ((tabx >= 16) and (tabx <= 28))) and (canAccessPrivateGates == true) then
+            if (#privateGates ~= 0) and (canAccessPrivateGates == true) then
+                term.setBackgroundColor(colors.black)
+                term.clear()
+
+                TermDraw(privateGates, colours.blue)
+
+                local returnstate = SelectSend()
+
+                if returnstate == true then
+                    state = false
+                end
+
+                computerAddresses = {}
+                computerNames = {}
+            else
+                term.setCursorPos(9,7)
+                term.clear()
+                term.write("no gates available")
+                sleep(5)
+            end
+        end
     end
     return 1
 end
@@ -357,8 +563,8 @@ function terminalMain()--main function
         else
             
             
-                TermDraw()
-                SelectSend()
+                tabSelector()
+                
                 parallel.waitForAny(timeout, termDisconnect)
             
         end 

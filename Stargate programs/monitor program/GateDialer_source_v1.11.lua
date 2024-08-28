@@ -1,12 +1,9 @@
 --update this to change how fast the gate dials on non universe or manualy dialing milky way gates--
 local gatespeed = .5
 
--- update these settings to change which types of gates this SG can access
+-- update these settings to change which types of gates this SG/TERMINAL can access
 local canAccessPrivateGates = true
 local canAccessHazardGates = true
-
-local beta = true
-
 
 -- four gate catagories , MAIN GATES for those gates that are mostly dialled with 7 chevron addresses
 -- player gates for those gates that are direct dialing other players bases (mostly 9 cheveron addresses)
@@ -34,8 +31,13 @@ local hazardGates = {
 local privateGates = {
 
 }
-    
-    
+
+
+-------------------------------------------------------------------------------------------------------------
+-----------DONT FIDDLE WITH ANYTHING BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING----------------------
+-------------------------------------------------------------------------------------------------------------
+
+
 local mon = peripheral.find("monitor")
 local gate = peripheral.find("advanced_crystal_interface") or peripheral.find("crystal_interface") or peripheral.find("basic_interface")
 if gate == nil then
@@ -528,7 +530,7 @@ local function selectionTabs()
         mon.write("Main Gates")
     end
 
-    if playerGates ~= 0 then
+    if #playerGates ~= 0 then
         paintutils.drawFilledBox(16,2,27,6,colors.green)
         mon.setCursorPos(18,4)
         mon.setBackgroundColor(colors.green)

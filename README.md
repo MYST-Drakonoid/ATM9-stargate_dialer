@@ -69,6 +69,8 @@ the setup should look like this:
 
 note: you should be able to disconnect the gate on either side by clicking on the green screen with the name of the address you just dialed.
 
+to set up the tables just upload the same program to the tablet
+
 note: these programs do work together on the same wired network attached to the stargate if that is what you want to do
 
 WARNING: THIS PROGRAM IS STILL INCOMPLETE. i will be updating it soon though
