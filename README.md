@@ -59,7 +59,8 @@ setting up a wireless gate is a bit mor expensive for all gates. here is what yo
     - gate(any gate works the same in this one)
     - advanced crystal interface (CANNOT BE LOWER AS IT DIRECT ENCODES THE CHEVERONS)
 
-    the setup should look like this:
+the setup should look like this:
+
 ![wireless example](descpics/WIRELESS_EXAMPLE.png)
 
 note: you should be able to disconnect the gate on either side by clicking on the green screen with the name of the address you just dialed.
