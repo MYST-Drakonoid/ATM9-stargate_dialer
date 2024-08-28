@@ -51,7 +51,7 @@ local computerNames = {}
 local gate = nil
 
 local pComp = nil
-local i = 1
+
 local selAdress = nil
 
 local _,_,_,reply,signal,_ = nil,nil,nil,nil,nil,nil
@@ -108,33 +108,29 @@ end
 
 local function GetClick() -- gets click information
     
-    local event, _, xPos, yPos = os.pullEvent("monitor_touch")
+    local event, _, xPos, yPos = os.pullEvent("mouse_click")
     return xPos, yPos
 end
 
-local function TermDraw(list, color) --tables side: draws selection options on the terminal
+local function TermDraw(list) --tables side: draws selection options on the terminal
     local x = 0
-    local y = 1
+    local y = -1
     local x1 = 0
     local x2 = 0
-    term.setBackgroundColor(colors.black)
-    term.clear()
-    term.setBackgroundColor(color)
-
-
+    local internaladdress = {}
 
     for i = 1,#list do
-        local internaladdress = {}
-
         if i % 2 == 0 then
             x = 15
         else
             x = 2
-            y = y + 1
+            y = y + 2
         end
         term.setCursorPos(x,y)
 
-        term.write(list[i])
+
+
+        term.write(list[i][1])
 
         x1 = x
         x2 = x + 9
@@ -203,24 +199,25 @@ local function SelectSend() --tablest side: gets input and trnasmits selected ga
     local dialing = false
     local selecting = true
 
-    term.setBackgroundColor(colors.black)
-    term.clear()
-
 
     while dialing == false and selecting == true do
-
+    
+            local cursX, cursY = GetClick()
+            
         for i = 1, #buttonXY do
 
-            local cursX, cursY = GetClick()
+            
 
             if (cursY == buttonXY[i][3]) and ((cursX >= buttonXY[i][1]) and (cursX <= buttonXY[i][2])) then
                 dialing = true
                 modem.open(8750)
                 modem.transmit(1327, 8750, computerAddresses[i])
                 term.setCursorPos(10,10)
+                term.clear()
                 term.write("dialing gate")
                 local _,_,_,_,dialreply,_ = os.pullEvent("modem_message")
                 term.clear()
+                term.setCursorPos(10,10)
                 term.write(dialreply)
                 selAdress = computerNames[i]
                 sleep(5)
@@ -231,6 +228,7 @@ local function SelectSend() --tablest side: gets input and trnasmits selected ga
             end
         end
     end
+    print("test")
     return dialing
 end
 
@@ -431,8 +429,9 @@ local function tabSelector()
             if #MainGates ~= 0 then
                 term.setBackgroundColor(colors.black)
                 term.clear()
+                term.setBackgroundColor(colors.purple)
 
-                TermDraw(MainGates, colours.purple)
+                TermDraw(MainGates)
 
                 local returnstate = SelectSend()
 
@@ -454,6 +453,7 @@ local function tabSelector()
             if #playerGates ~= 0 then
                 term.setBackgroundColor(colors.black)
                 term.clear()
+                term.setBackgroundColor(colors.green)
 
                 TermDraw(playerGates, colours.green)
 
@@ -476,8 +476,9 @@ local function tabSelector()
             if (#hazardGates ~= 0) and (canAccessHazardGates == true) then
                 term.setBackgroundColor(colors.black)
                 term.clear()
+                term.setBackgroundColor(colors.red)
 
-                TermDraw(hazardGates, colours.red)
+                TermDraw(hazardGates)
 
                 local returnstate = SelectSend()
 
@@ -498,8 +499,9 @@ local function tabSelector()
             if (#privateGates ~= 0) and (canAccessPrivateGates == true) then
                 term.setBackgroundColor(colors.black)
                 term.clear()
+                term.setBackgroundColor(colors.blue)
 
-                TermDraw(privateGates, colours.blue)
+                TermDraw(privateGates)
 
                 local returnstate = SelectSend()
 
@@ -561,7 +563,7 @@ function terminalMain()--main function
             end
             
         else
-            
+                modem.open(8750)
             
                 tabSelector()
                 
