@@ -567,12 +567,7 @@ function terminalMain()--main function
         else
                 modem.open(8750)
             
-                parallel.waitForAny(tabSelector, pararecieve)
-
-                if signal == 1000 then
-                    gate.disconnectStargate()
-                    signal = 0
-                end
+                tabSelector()
                 
                 parallel.waitForAny(timeout, termDisconnect)
             
