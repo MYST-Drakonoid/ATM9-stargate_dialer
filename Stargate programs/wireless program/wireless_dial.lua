@@ -215,10 +215,10 @@ local function SelectSend() --tablest side: gets input and trnasmits selected ga
                 term.setCursorPos(10,10)
                 term.clear()
                 term.write("dialing gate")
-                local _,_,_,_,dialreply,_ = os.pullEvent("modem_message")
+                parallel.waitForAny(pararecieve, GetClick)
                 term.clear()
                 term.setCursorPos(10,10)
-                term.write(dialreply)
+                term.write(signal)
                 selAdress = computerNames[i]
                 sleep(5)
                 cursX = 0
