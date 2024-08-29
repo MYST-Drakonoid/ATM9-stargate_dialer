@@ -97,7 +97,7 @@ local function recieveDial() --computer end: recieves address request and dials 
     Dial(address)
 
     modem.open(1327)
-    modem.transmit(8750,1327,"dialing complete")
+    --modem.transmit(8750,1327,"dialing complete")
     local Rcheck = parallel.waitForAny(paraShutdown, DisconnectCheck)
 
     if Rcheck == 2 then
@@ -215,10 +215,10 @@ local function SelectSend() --tablest side: gets input and trnasmits selected ga
                 term.setCursorPos(10,10)
                 term.clear()
                 term.write("dialing gate")
-                parallel.waitForAny(pararecieve, GetClick)
+                --parallel.waitForAny(pararecieve, GetClick)
                 term.clear()
                 term.setCursorPos(10,10)
-                term.write(signal)
+                --term.write(signal)
                 selAdress = computerNames[i]
                 sleep(5)
                 cursX = 0
@@ -369,7 +369,7 @@ local function termDisconnect() --tablet side: sends dissconect code to computer
             term.setCursorPos(4,8)
             term.write("disconnected")
             sleep(1.5)
-        elseif (Rcheck == 2) and (signal == 1000) then
+        elseif (signal == 1000) then
             intcheck = false
             term.setBackgroundColor(colors.black)
             term.clear()
