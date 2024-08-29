@@ -2,8 +2,6 @@ simply put this is a program to help dial stargates,
 
 DISCLAIMER: I AM NOT A PROFESSIONAL PROGRAMMER, I JUST WANT TO SHARE MY PROJECT
 
-NOTE: THE WIRELESS DIAL PROGRAM IS STILL IN PROGRESS YOU MIGHT HAVE TO MODIFY THE GATES THAT I HAVE SETUP TO YOURS IN THE MEANTIME
-
 
 
 
@@ -73,7 +71,7 @@ to set up the tables just upload the same program to the tablet
 
 note: these programs do work together on the same wired network attached to the stargate if that is what you want to do
 
-WARNING: THIS PROGRAM IS STILL INCOMPLETE. i will be updating it soon though
+
 
 
 

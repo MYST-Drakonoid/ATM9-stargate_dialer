@@ -112,7 +112,7 @@ local function GetClick() -- gets click information
     return xPos, yPos
 end
 
-local function TermDraw(list) --tables side: draws selection options on the terminal
+local function TermDraw(list) --tablets side: draws selection options on the terminal
     local x = 0
     local y = -1
     local x1 = 0
