@@ -305,7 +305,7 @@ function Dial(address) --computer side:borrowed code to dial the gate. credit: P
         
         local start = gate.getChevronsEngaged() + 1
 
-        if addressLength == 8 then
+        if addressLength == 8 and gateType ~= "sgjourney:universe_stargate" then
             gate.setChevronConfiguration({1, 2, 3, 4, 6, 7, 8, 5})
         elseif addressLength == 9 then
             gate.setChevronConfiguration({1, 2, 3, 4, 5, 6, 7, 8})
