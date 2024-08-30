@@ -1,5 +1,8 @@
---update this to change how fast the gate dials on non universe or manualy dialing milky way gates--
+--update this to change how fast the gate dials on non universe or direct encoding milky way gates--
 local gatespeed = .5
+
+-- configures whether the milky way gates manually dial or not
+local manualDial = true
 
 -- update these settings to change which types of gates this SG/TERMINAL can access
 local canAccessPrivateGates = true
@@ -285,7 +288,7 @@ local function Dial(address) --borrowed code to dial the gate. credit: Povstalec
 
     local gateType = gate.getStargateType()
 
-    if gateType == "sgjourney:milky_way_stargate" then
+    if gateType == "sgjourney:milky_way_stargate" and manualDial == true then
 
         mon.setBackgroundColor(colors.black)
         mon.clear()
