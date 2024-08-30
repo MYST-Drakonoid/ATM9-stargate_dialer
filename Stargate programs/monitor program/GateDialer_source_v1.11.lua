@@ -51,8 +51,6 @@ gate.disconnectStargate()
 
 
 -- outgoing variables
-local touchEvent = false
-local nameOfDest = ""
 local destAddress = {}
 local buttonXY = {}
 local computerAddresses = {}
@@ -386,61 +384,28 @@ local function Dial(address) --borrowed code to dial the gate. credit: Povstalec
         mon.setBackgroundColor(colors.red)
         mon.setTextScale(2)
         mon.setCursorPos(2,3)
-        mon.write("DIALING GATE") 
-        
-        -- local addressLength = nil
-        -- addressLength = #address
-        --You don't really need to have this variable,
-        --I just like to use lots of variables with
-        --names to make everything immediately clear
+        mon.write("DIALING GATE")
 
-        
-        
-        local start = gate.getChevronsEngaged() + 1
-        --This is a helpful variable we'll be using to
-        --make resuming dialing easier.
-        --Basically what this does is it makes the computer
-        --check how many chevrons are engaged and start from
-        --the next one (that's why there's a +1)
-        
-        for chevron = start,#address,1
+        if gateType ~= "sgjourney:universe_stargate" then
+
+            if addressLength == 8 then
+                gate.setChevronConfiguration({1, 2, 3, 4, 6, 7, 8, 5})
+            elseif addressLength == 9 then
+                gate.setChevronConfiguration({1, 2, 3, 4, 5, 6, 7, 8})
+            end
+        end
+
+        local start = gate.getChevronsEngaged() + 1 --makes sure the gate starts where its supposed to
+
+
+
+        for chevron = start,#address,1 --dialing loop
         do
-            --This is a loop that will go through all the
-            --symbols in an address
 
-            
-            
             local symbol = address[chevron]
-            
-            -- if chevron % 2 == 0 then
-            --     gate.rotateClockwise(symbol)
-            -- else
-            --     gate.rotateAntiClockwise(symbol)
-            -- end
-            -- --Here we're basically making sure the gate ring
-            -- --rotates clockwise when the number of chevrons
-            -- --engaged is even and counter-clockwise when odd
+
             gate.engageSymbol(symbol)
             sleep(gatespeed)
-            
-
-            
-            
-            -- while(not gate.isCurrentSymbol(symbol))
-            -- do
-            --     sleep(0)
-            -- end
-            --This effectively ensures the program doesn't
-            --do anything else and lets the dialing finish
-            --rotating to the correct symbol
-            
-            -- sleep(1)
-            -- --We want to wait 1 second before we
-            -- --engage the chevron
-            -- gate.openChevron() --This opens the chevron
-            -- sleep(1)
-            -- gate.closeChevron() -- and this closes it
-            -- sleep(1)
 
             
 
@@ -514,7 +479,8 @@ local function ParaDial() -- seperating touch dialing so timeout function can wo
 
             elseif sely >= 17 and selx >= 23 then
                 selecting = false
-                
+                sely = (0)
+                selx = (0)
             end
         end
     end

@@ -413,10 +413,16 @@ end
 local function tabSelector()
     
 
+
     local state = true
     
     
     while state == true do
+
+        computerAddresses = {}
+        computerNames = {}
+        buttonXY = {}
+        signal = nil
         term.setBackgroundColor(colors.black)
         term.clear()
         
