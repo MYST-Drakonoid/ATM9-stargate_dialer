@@ -482,6 +482,10 @@ local function ParaDial() -- seperating touch dialing so timeout function can wo
                 sely = (0)
                 selx = (0)
             end
+
+            local buttonXY = {}
+            local computerAddresses = {}
+            local computerNames = {}
         end
     end
     return dialing
