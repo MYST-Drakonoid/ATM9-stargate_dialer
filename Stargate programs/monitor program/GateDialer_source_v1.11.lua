@@ -41,6 +41,7 @@ local privateGates = {
 -------------------------------------------------------------------------------------------------------------
 
 
+
 local mon = peripheral.find("monitor")
 local gate = peripheral.find("advanced_crystal_interface") or peripheral.find("crystal_interface") or peripheral.find("basic_interface")
 if gate == nil then
@@ -482,11 +483,12 @@ local function ParaDial() -- seperating touch dialing so timeout function can wo
                 sely = (0)
                 selx = (0)
             end
-
-            local buttonXY = {}
-            local computerAddresses = {}
-            local computerNames = {}
         end
+
+        local buttonXY = {}
+        local computerAddresses = {}
+        local computerNames = {}
+        
     end
     return dialing
 end
