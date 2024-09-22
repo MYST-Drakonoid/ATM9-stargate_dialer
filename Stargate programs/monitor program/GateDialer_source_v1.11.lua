@@ -1,8 +1,15 @@
 --update this to change how fast the gate dials on non universe or direct encoding milky way gates--
-local gatespeed = .5
+local FastGateSpeed = .05
+
+local medGateSpeed = .5
+
+local slowGateSpeed = 1
 
 -- configures whether the milky way gates manually dial or not
 local manualDial = true
+
+-- default gate Dial speed at dial (does not affect universe gates)
+local defaultSpeedtype = 2
 
 -- update these settings to change which types of gates this SG/TERMINAL can access
 local canAccessPrivateGates = true
@@ -51,6 +58,12 @@ gate.disconnectStargate()
 
 
 
+
+
+
+
+
+
 -- outgoing variables
 local destAddress = {}
 local buttonXY = {}
@@ -63,6 +76,8 @@ local selx = 0
 local sely = 0
 local dialing = false
 local totalstate = nil
+
+
 
 --Incoming variables
 local incomingWormhole = false

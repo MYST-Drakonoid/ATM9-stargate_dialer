@@ -65,15 +65,17 @@ for i = 1, settingsList do
 
 end
 
-if addressCheck == false do 
+if addressCheck == false then 
     settings.define("Addresses.setting",{
         description = "gate addresses to be referenced on this computer"
         })
     settings.set("Addresses.settings", fulladdresses)
 else
     settings.set("Addresses.settings", fulladdresses)
+end
     
 if speedCheck == false then
     settings.define("GateSpeed.setting",{
         description = "gate addresses to be referenced on this computer"
         })
+    end
