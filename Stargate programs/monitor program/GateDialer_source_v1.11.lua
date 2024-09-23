@@ -1,3 +1,6 @@
+
+
+
 --update this to change how fast the gate dials on non universe or direct encoding milky way gates--
 local FastGateSpeed = .05
 
@@ -5,49 +8,35 @@ local medGateSpeed = .5
 
 local slowGateSpeed = 1
 
--- configures whether the milky way gates manually dial or not
-local manualDial = true
 
--- default gate Dial speed at dial (does not affect universe gates)
-local defaultSpeedtype = 2
-
--- update these settings to change which types of gates this SG/TERMINAL can access
-local canAccessPrivateGates = true
-local canAccessHazardGates = true
 
 -- four gate catagories , MAIN GATES for those gates that are mostly dialled with 7 chevron addresses
 -- player gates for those gates that are direct dialing other players bases (mostly 9 cheveron addresses)
 -- hazard gates for gates that are hostile on the destination
 -- private 9 cheveron gates for specific players
 
--- Main Gate Addresses
-local MainGates = {
-    {"OVERWORLD",   27,25,4,35,10,28,0},           --overworld
-    {"Nether",      27,23,4,34,12,28,0},           --theNether
-    {"End",         13,24,2,19,3,30,0},            --theEnd
-    {"Abidos",      26,6,14,31,11,29,0},           --abidos
-    {"Chulak",      8,1,22,14,36,19,0}             --chulak
-}
 
--- player gate addresses
-local playerGates = {
-}
-
--- hazard gate addresses
-local hazardGates = {
-}
-
--- personal gate addresses
-local privateGates = {
-
-}
 
 
 -------------------------------------------------------------------------------------------------------------
 -----------DONT FIDDLE WITH ANYTHING BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING----------------------
 -------------------------------------------------------------------------------------------------------------
 
+settings.load()
 
+local fullGates = 
+
+-- Main Gate Addresses
+local MainGates = 
+
+-- player gate addresses
+local playerGates = 
+
+-- hazard gate addresses
+local hazardGates = 
+
+-- personal gate addresses
+local privateGates = 
 
 local mon = peripheral.find("monitor")
 local gate = peripheral.find("advanced_crystal_interface") or peripheral.find("crystal_interface") or peripheral.find("basic_interface")
