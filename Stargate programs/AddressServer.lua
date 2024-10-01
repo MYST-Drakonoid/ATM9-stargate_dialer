@@ -88,7 +88,7 @@ local function requestinfo(signalinfo) --functions both as a startup numbwer of 
     else 
         retruninfo = startupreturn
     end
-    return startupreturn
+    return retruninfo
 end
 
 local function infoChecker(info)
@@ -107,3 +107,5 @@ local function Main() -- main function for the code
 
     end
 end
+
+Main()

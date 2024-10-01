@@ -86,12 +86,5 @@ for i = 1, settingsList do
     end
 end
 
-if dialtypeCheck == false then 
-    settings.define("Addresses.settings",{
-        description = "full list of addresses for tram"
-        })
-    settings.set("Addresses.settings", fulladdresses)
-else
-    settings.set("Addresses.settings", fulladdresses)
-end
+
 
