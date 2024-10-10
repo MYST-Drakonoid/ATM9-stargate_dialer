@@ -170,18 +170,18 @@ end
 
 local function GetClick() -- gets click information
     mon.setTextScale(1)
-    local event, _, xPos, yPos = os.pullEvent("monitor_touch")
+    local _, _, xPos, yPos = os.pullEvent("monitor_touch")
     return xPos, yPos
 end
 
 local function GetActivation() -- gets incoming wormhole event
-    IncomingAddress = os.pullEvent("stargate_incoming_wormhole")
+    _, IncomingAddress = os.pullEvent("stargate_incoming_wormhole")
     incomingWormhole = true
     return 1
 end
 
 local function CheveronActivation() -- checks if cheverons are activating on their own
-    local event,_,_,incomingBool = os.pullEvent("stargate_chevron_engaged")
+    local _,_,_,incomingBool = os.pullEvent("stargate_chevron_engaged")
     if incomingBool == true then
         incomingWormhole = true
         print("external dial")
