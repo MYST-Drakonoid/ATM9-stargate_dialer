@@ -1,9 +1,9 @@
 
-local computerID = nil --identifies the user for the server
+local computerID = 10 --identifies the user for the server
 
--- update these settings to change which types of gates this SG/TERMINAL can access
-local canAccessPrivateGates = true
-local canAccessHazardGates = true
+-- update these settings to change which types of gates this SG/TERMINAL can access (0 = false/1 = true)
+local canAccessPrivateGates = 1
+local canAccessHazardGates = 1
 
 -------------------------------------------------------------------------------------------------------------
 -----------DONT FIDDLE WITH ANYTHING BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING----------------------
@@ -53,8 +53,9 @@ print("END OF SETTING CONFIGURATION")
 ---END OF SETTING CONFIGURATION ------SETTING UP PERIPHERALS------------------------------------------------
 
 local modem = peripheral.find("modem")
-local gate = peripheral.find("advanced_crystal_interface")
+-- local gate = peripheral.find("advanced_crystal_interface")
 local mon = peripheral.find("monitor")
+local env = peripheral.find("environmentDetector")
 
 ---gatenumber requester
 
@@ -71,8 +72,50 @@ local selx = 0
 local sely = 0
 local dialing = false
 local totalstate = nil
+local addressbook = {}
+local incomingSignal = nil
 
 local _,_,_,reply,signal,distance = nil,nil,nil,nil,nil,nil
+
+local function pararecieve() -- function to make modem message events simpler
+    _,_,_,_,signal,distance = os.pullEvent("modem_message")
+    if distance <= 64 then
+        incomingSignal = signal
+        return 1
+    end
+end
+
+local function simplerecieve() -- function to make modem message events simpler
+    _,_,_,_,signal,_ = os.pullEvent("modem_message")
+    return signal
+end
+
+local function AddressBookRetrieval(compID, hazPerm, privPerm)
+    local recieved = false
+    local infosignal = nil
+    while recieved == false do -- loop for checking if recieved addressbook is correct addressbook
+        local dimension = env.getDimensionName()
+        local addressRequest = {hazPerm, privPerm, dimension, compID}
+
+        modem.open(4256) --opening modem to info recieve frequency
+
+        modem.transmit(1327, _, addressRequest)
+
+        infosignal = simplerecieve()
+
+        if infosignal[1] == compID then
+            recieved = true
+
+            modem.close(4256) --closing modem to info recieve frequency
+
+            table.remove(infosignal[1]) -- removing computerID from signal for ease of use
+        end
+    end
+
+    return infosignal
+end
+    
+
 
 
 local function screenWrite(list,fcount, fy) -- iterates through lists and dispalys them neatly on screens
@@ -377,9 +420,11 @@ local function ParaDial() -- seperating touch dialing so timeout function can wo
                 selx = (0)
 
             elseif sely >= 17 and selx >= 23 then
+
                 selecting = false
                 sely = (0)
                 selx = (0)
+
             end
         end
 
@@ -392,103 +437,6 @@ local function ParaDial() -- seperating touch dialing so timeout function can wo
 end
 
 
-local function Dial() --borrowed code to dial the gate. credit: Povstalec
-    --Milky Way Stargate is a special case when it comes
-    --to dialing
-
-    local address = destAddress
-    print(gate.addressToString(address))
-
-    local gateType = gate.getStargateType()
-
-    if gateType == "sgjourney:milky_way_stargate" and manualDial == true then -- code for manually dialling a milky way SG
-
-        local addressLength = #address
-
-        --CONVERTING THE ORDER IN WHICH THE GATE ENGAGES THE CHEVERONS
-        if addressLength == 8 then 
-            print(gate.setChevronConfiguration({1, 2, 3, 4, 6, 7, 8, 5}))
-        elseif addressLength == 9 then
-            print(gate.setChevronConfiguration({1, 2, 3, 4, 5, 6, 7, 8}))
-        end
-
-        local start = gate.getChevronsEngaged() + 1 --failsafe code to make sure the gate continues dialling where it is supposed to
-
-        for chevron = start,addressLength,1 do -- beginning the iteration on the address to encode it to the gate
-
-            local symbol = address[chevron]
-
-            -- GATE ROTATION CODE --
-            if chevron % 2 == 0 then
-                gate.rotateClockwise(symbol)
-            else
-                gate.rotateAntiClockwise(symbol)
-            end
-
-            -- protective code keeps the program from doing anything until the rotation completes
-            while(not gate.isCurrentSymbol(symbol))
-            do
-                sleep(0)
-            end
-
-            sleep(1)
-
-            gate.openChevron() --This opens the chevron
-            sleep(1)
-            gate.closeChevron() -- and this closes it
-            sleep(1)
-
-
-            // input-- proper code here for wireless gate communication of dial sequence
-        end 
-    else
-
-        if gateType ~= "sgjourney:universe_stargate" then
-
-            if addressLength == 8 then
-                gate.setChevronConfiguration({1, 2, 3, 4, 6, 7, 8, 5})
-            elseif addressLength == 9 then
-                gate.setChevronConfiguration({1, 2, 3, 4, 5, 6, 7, 8})
-            end
-        end
-
-        local start = gate.getChevronsEngaged() + 1 --makes sure the gate starts where its supposed to
-
-
-
-        for chevron = start,#address,1 --dialing loop for  all non rotating gates and auto MW gates
-        do
-
-            local symbol = address[chevron]
-
-            gate.engageSymbol(symbol)
-            sleep(gatespeed) -- detemining factor in how fast the gate dials
-
-            // input --proper code here for wireless gate communication of dial sequence
-
-            if (symbol) ~= 0 then
-
-            -- THIS CODE CHECKS IF THE GATE IS A UNIVERSE GATE SO IT CAN LIGHT UP A CHEVEERON ON THE FLOOR--
-            if (gateType == "sgjourney:universe_stargate") or (gateType == "sgjourney:pegasus_stargate")  then
-                os.pullEvent(gate.stargate_chevron_engaged) 
-            end
-
-            else 
-                if gateType == "sgjourney:universe_stargate" then
-                    os.pullEvent(gate.stargate_chevron_engaged)
-                    redstone.setOutput("top",true)
-                elseif (gateType == "sgjourney:pegasus_stargate") then
-                    os.pullEvent(gate.stargate_chevron_engaged)
-                end
-
-            end
-
-        end
-
-        address = nil -- CLEARS THE VARIABLE FOR CODE RELIABILITY
-    end
-
-end
 
 local function paraShutdown()
     _,_,_,reply,signal,_ = os.pullEvent("modem_message")
@@ -517,24 +465,27 @@ end
 
 local function Main() -- main program operating the application
 
-    if gate ~= nil then
+    if  mon ~= nil then
         while true do
-            local tempcheck = nil
-
-            _,_,_,reply,signal,distance = os.pullEvent("modem_message")
-
-            if signal[3] ~= 0 then
-                
-            end
-
-            tempcheck = parallel.waitForAny(Dial, paraShutdown)
-
-            if tempcheck == 1 then
-                parallel.waitForAny(paraShutdown, DisconnectCheck)
+            mon.setTextScale(1)
+            mon.setBackgroundColor(colors.black)
+            mon.clear()
+            mon.setCursorPos(9,1)
+            mon.setBackgroundColor(colors.red)
+            mon.write("press to start")
+    
+            local answer = parallel.waitForAny(GetClick, pararecieve)
+    
+            if (answer == 1) then
+                AddressBookRetrieval()
+    
+                PRIMARYDialingOut()
+            else
+                if incomingSignal == 421732 then
+                -- incoming wormhole function here
+                end
             end
         end
-    elseif mon ~= nil then
-        
     elseif pocket == true then
 
     end
@@ -542,3 +493,5 @@ local function Main() -- main program operating the application
 end
 
 Main()
+
+

@@ -1,4 +1,6 @@
-settings.load()
+
+
+
 
 local modem = peripheral.find("modem")
 
@@ -62,7 +64,7 @@ local tempMAIN = nil
 local tempPLAYER = nil
 local tempHAZARD = nil
 local tempPRIVATE = nil
--- startup == 1452
+
 -- recieve info == 1327
 -- transmit code == 4256
 -- to gate == 5572
@@ -77,16 +79,23 @@ local tempPRIVATE = nil
 --
 --}
 
+
+
 ---to stargate signal breakdown
 ---1.computerid
----2.address
+---2.addresses
 ---3.gatesetting
+
+
 
 
 
 local function requestinfo(signalinfo) --functions both as a startup numbwer of address counter and a computer ID filter
 
     tempMAIN = MainGates
+    
+
+
     tempPLAYER = playerGates
 
 ------ filtering conditonal gates ------------------------------------------------------------------------------------------
@@ -117,7 +126,7 @@ local function requestinfo(signalinfo) --functions both as a startup numbwer of 
     
     if signalinfo[2] == 1 then
         for i = 1, #privateGates do -- filtering private gates with the Computer ID
-            if privateGates[i][1]  == signalinfo[2] then
+            if privateGates[i][1]  ~= signalinfo[4] then
                 table.remove(tempPRIVATE, i) 
             end
         end
@@ -138,8 +147,14 @@ local function Main() -- main function for the code
         modem.open(1327)
         local signal,_ = pararecieve()
 
-        
+            tempMAIN = nil
+            tempPLAYER = nil
+            tempHAZARD = nil
+            tempPRIVATE = nil
+
+
             local response = requestinfo(signal)
+            sleep(.5)
             
             modem.transmit(4256, _, response)
         
