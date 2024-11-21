@@ -382,7 +382,7 @@ end
 
 local function DisconnectCheck() -- does exactly what you think it does (if an unexpected error is thrown this siezes the program too)
     
-    local disCode = os.pullEvent("stargate_disconnected")
+    local _, _, disCode = os.pullEvent("stargate_disconnected")
     if (disCode ~= 7 or 8 or 9 or 10 or -1 or -15 or -16 or -19 or "stargate_disconnected") then
             redstone.setOutput("front",false)
             print(disCode)

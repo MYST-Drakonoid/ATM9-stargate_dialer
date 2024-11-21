@@ -52,7 +52,7 @@ local hazardGates = {
 local privateGates = {
     {10, "Mcolony",     6,10,25,11,30,15,28,4,0},         --Mysts's colony
     {10, "reactor",     9,24,35,17,26,20,28,22,0},        --Reactor room
-    {10, "station",     24,20,15,23,6,12,1,19,0},         -- space station
+    {10, "TARIDS",      24,20,15,23,6,12,1,19,0},         -- MYST TARDIS
 }
 
 local function pararecieve() -- function to make modem message events simpler
@@ -65,7 +65,7 @@ local tempPLAYER = nil
 local tempHAZARD = nil
 local tempPRIVATE = nil
 
--- recieve info == 1327
+-- recieve info == 1329
 -- transmit code == 4256
 -- to gate == 5572
 -- from gate == 1237
@@ -86,7 +86,9 @@ local tempPRIVATE = nil
 ---2.addresses
 ---3.gatesetting
 
-
+---gatecodes
+---345001 disconnected
+---421732 incoming wormhole
 
 
 
@@ -144,13 +146,15 @@ end
 
 local function Main() -- main function for the code
     while true do
-        modem.open(1327)
+        modem.open(1329)
         local signal,_ = pararecieve()
 
             tempMAIN = nil
             tempPLAYER = nil
             tempHAZARD = nil
             tempPRIVATE = nil
+
+
 
 
             local response = requestinfo(signal)
