@@ -33,10 +33,10 @@ local MainGates = {
 
 -- player gate addresses
 local playerGates = {
-    {-10, "MYST&AJ",     18,22,34,14,21,19,9,23,0},       --MYSTAJ
-    {-20, "magicINC",    11,24,31,14,9,26,27,20,0},       --magicINC
-    {-30, "Asteria",     32,27,30,26,3,12,33,2,0},        --Asteria
-    {-40, "Centurion",   19,12,8,24,22,14,1,30,0}         --Centurion
+    {10, "MYST&AJ",     18,22,34,14,21,19,9,23,0},       --MYSTAJ
+    {20, "magicINC",    11,24,31,14,9,26,27,20,0},       --magicINC
+    {30, "Asteria",     32,27,30,26,3,12,33,2,0},        --Asteria
+    {40, "Centurion",   19,12,8,24,22,14,1,30,0}         --Centurion
 }
 
 -- hazard gate addresses
@@ -96,46 +96,57 @@ local function requestinfo(signalinfo) --functions both as a startup numbwer of 
     tempMAIN = MainGates
     
 
+    local hazPerm = signalinfo["hp"]
+    local privPerm = signalinfo["pp"]
+    local dimension = signalinfo["dim"]
+    local compID = signalinfo["id"]
 
     tempPLAYER = playerGates
 
 ------ filtering conditonal gates ------------------------------------------------------------------------------------------
-    if signalinfo[1] == 1 then 
+    if hazPerm == 1 then 
         tempHAZARD = hazardGates
     else
         tempHAZARD = nil
     end
 
-    if signalinfo[2] == 1 then
+    if privPerm == 1 then
         tempPRIVATE = privateGates
     else
         tempPRIVATE = nil
     end
------- filtering conditonal gates ------------------------------------------------------------------------------------------ 
+------ filtering gates by location------------------------------------------------------------------------------------------ 
     
     for i = 1, #MainGates do -- filtering player gates with the Computer ID
-        if MainGates[i][1] == signalinfo[3] then
+        if MainGates[i][1] == dimension then
             table.remove(tempMAIN, i) 
         end
     end
 
     for i = 1, #playerGates do -- filtering player gates with the Computer ID
-        if playerGates[i][1]  == signalinfo[2] *-1 then
+        if playerGates[i][1]  == compID then
             table.remove(tempPLAYER, i) 
         end
     end
     
     if signalinfo[2] == 1 then
         for i = 1, #privateGates do -- filtering private gates with the Computer ID
-            if privateGates[i][1]  ~= signalinfo[4] then
+            if privateGates[i][1]  ~= compID then
                 table.remove(tempPRIVATE, i) 
             end
         end
     end
 
     local tempfull = {
-        signalinfo[4], tempMAIN, tempPLAYER, tempHAZARD, tempPRIVATE -- full list of the modified list of gates
+         -- full list of the modified list of gates
     }
+
+    tempfull["ID"] = compID
+    tempfull["MG"] = tempMAIN
+    tempfull["PG"] = tempPLAYER
+    tempfull["HG"] = tempHAZARD
+    tempfull["PRG"] = tempPRIVATE
+
     return tempfull
 end
 
@@ -148,13 +159,14 @@ local function Main() -- main function for the code
         modem.open(1329)
         local signal,_ = pararecieve()
 
+        for i = 1, #signal do 
+            print(i)
+        end
+
             tempMAIN = nil
             tempPLAYER = nil
             tempHAZARD = nil
             tempPRIVATE = nil
-
-
-
 
             local response = requestinfo(signal)
             sleep(.5)

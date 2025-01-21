@@ -54,9 +54,9 @@ print("END OF SETTING CONFIGURATION")
 ---END OF SETTING CONFIGURATION ------SETTING UP PERIPHERALS------------------------------------------------
 
 local modem = peripheral.find("modem")
--- local gate = peripheral.find("advanced_crystal_interface")
+
 local mon = peripheral.find("monitor")
-local env = peripheral.find("environmentDetector")
+local detector = peripheral.wrap("right")
 
 ---gatenumber requester
 
@@ -96,11 +96,10 @@ end
 
 local function AddressBookProcessing(rawAddresses)
 
-    MainGates = rawAddresses[1]
-    playerGates = rawAddresses[2]
-    hazardGates = rawAddresses[3]
-    privateGates = rawAddresses[4]
-
+    MainGates = rawAddresses["MG"]
+    playerGates = rawAddresses["PG"]
+    hazardGates = rawAddresses["HG"]
+    privateGates = rawAddresses["PRG"]
 
 end
 
@@ -129,10 +128,15 @@ end
 
 local function AddressBookRetrieval(compID, hazPerm, privPerm)
     local recieved = false
-    local infosignal = nil
+    local infosignal = {}
     while recieved == false do -- loop for checking if recieved addressbook is correct addressbook
-        local dimension = env.getDimensionName()
-        local addressRequest = {hazPerm, privPerm, dimension, compID}
+        local dimension = detector.getDimension()
+        local addressRequest = {}
+
+        addressRequest["hp"] = hazPerm
+        addressRequest["pp"] = privPerm
+        addressRequest["dim"] = dimension
+        addressRequest["id"] = compID
 
         modem.open(4256) --opening modem to info recieve frequency
 
@@ -140,7 +144,7 @@ local function AddressBookRetrieval(compID, hazPerm, privPerm)
 
         infosignal, _ = simplerecieve()
 
-        if infosignal[1] == compID then
+        if infosignal["ID"] == compID then
             recieved = true
 
             modem.close(4256) --closing modem to info recieve frequency
