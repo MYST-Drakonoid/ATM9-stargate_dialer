@@ -30,11 +30,37 @@ local function DisconnectCheck() -- does exactly what you think it does (if an u
     return 2
 end
 
+local function parachronshutdown()
+
+    sleep(180)
+    gate.disconnectStargate()
+
+    return 1
+    
+end
+
 local function paraShutdown()
     _,_,_,reply,signal,distance = os.pullEvent("modem_message")
-    if signal == 100 and ((distance <= 64)and (distance ~= nil)) then
+    if signal == 345000 and ((distance <= 64)and (distance ~= nil)) then
         redstone.setOutput("front",false)
         gate.disconnectStargate()
+    end
+
+    return 1
+end
+
+local function simplerecieve() -- function to make modem message events simpler
+    _,_,_,_,signal,distance = os.pullEvent("modem_message")
+    return signal, distance
+end
+
+local function pararecieve() -- function to make modem message events simpler
+    modem.open(1237)
+    _,_,_,_,signal,distance = os.pullEvent("modem_message")
+    if ((distance <= 64)and (distance ~= nil)) then
+        incomingSignal = signal
+        modem.close(1237)
+        return 1
     end
 end
 
@@ -46,13 +72,17 @@ local function incomingWormhole() -- incoming wormhole detection
         gate.closeIris()
         os.pullEvent("stargate_incoming_wormhole")
         local _,_,GDO = os.pullEvent("stargate_message_received")
-        if GDO == password then
-            gate.openIris()
+        if password ~= nil then
+            if GDO == password then
+                gate.openIris()
+            end
         end
     else
-        modem.transmitmodem.transmit(1237,5572,421732) -- transmit code for incoming wormholes
+        modem.transmit(1237,5572,421732) -- transmit code for incoming wormholes
+        os.pullEvent("stargate_incoming_wormhole")
+        modem.transmit(1237,5572,421732) -- tells the computer that the wormhole has been established
     end
-
+    return 1
 end
 
 
@@ -166,12 +196,14 @@ function NewDial() -- dialling code for the gates
 
         address = {_, _, _, _, _, _, _, _, _}
     end
+
+    parallel.waitForAny(paraShutdown, parachronshutdown, DisconnectCheck)
 end
 
 
 local function MAIN()
     while true do
-        
+       local state = parallel.waitForAny(pararecieve, incomingWormhole)
     end
 end
 

@@ -109,6 +109,10 @@ local function simplerecieve() -- function to make modem message events simpler
     return signal, distance
 end
 
+local function disconcode()
+    modem.transmit(5572, 1237, 345000)
+end
+
 local function Netdisconnect()
     local disconnect = false
 
@@ -132,7 +136,7 @@ local function AddressBookRetrieval(compID, hazPerm, privPerm)
 
         modem.open(4256) --opening modem to info recieve frequency
 
-        modem.transmit(1327, _, addressRequest)
+        modem.transmit(1329, 4256, addressRequest)
 
         infosignal, _ = simplerecieve()
 
@@ -155,6 +159,37 @@ local function GetClick() -- gets click information
     mon.setTextScale(1)
     local _, _, xPos, yPos = os.pullEvent("monitor_touch")
     return xPos, yPos
+end
+
+local function incomingCode()
+
+    mon.setBackgroundColor(colors.green)
+    mon.clear()
+    mon.setCursorPos(9,9)
+    mon.write("incoming Wormhole")
+    redstone.setOutput("bottom", true)
+
+    local insig, indis = simplerecieve()
+
+    if indis < 64 and insig == 421732 then
+        mon.setBackgroundColor(colors.blue)
+        mon.clear()
+        mon.setCursorPos(9,9) 
+        mon.write("Incoming Wormhole Esatablished")
+        redstone.setOutput("bottom", false)
+    end
+
+    local dissig, disdis = simplerecieve()
+
+    if dissig == 345001 and disdis < 64 then
+        mon.setBackgroundColor(colors.black)
+        mon.clear()
+        mon.setCursorPos(9,9) 
+        mon.write("Wormhole Disconnected")
+    end
+
+    
+
 end
 
 
@@ -210,7 +245,7 @@ local function screenWrite(list,fcount, fy) -- iterates through lists and dispal
     return fcount, fy
 end
 
-local function selectionTabs() --draws the initial selection menu
+local function selectionTabs() --draws the initial selection menu for both tablet and monitor
     
     if pocket == false then -- if the computer is a fixed monitor draw the buttons this way
         mon.setBackgroundColor(colors.black)
@@ -327,13 +362,181 @@ local function selectionTabs() --draws the initial selection menu
     end
 end
 
-local function tabSelector()
+local function DialText()
+    -- mon.setBackgroundColor(colors.black)
+    -- mon.clear()
+    -- mon.setBackgroundColor(colors.red)
+    -- mon.setTextScale(2)
+    -- mon.setCursorPos(9,1)
+    -- mon.write("DIALING GATE") 
+    mon.setBackgroundColor(colors.green)
+    mon.clear()
+    mon.setTextScale(1)
+    mon.setCursorPos(6,5)
+    mon.write(destAddressname)
+
+    mon.setCursorPos(3,10)
+    for i = 1, #destAddress do
+        mon.write(destAddress[i])
+        mon.write(" ")
+    end
+    destAddress = {}
+    destAddressname = ""
+end
+
+local function ParaDial() -- seperating touch dialing so timeout function can work
+
+    local selecting = true
+    while dialing == false and selecting == true do
+
+        selx, sely = GetClick()
+        if pocket == true then
+            for i = 1, #buttonXY do
+
+                if (sely == buttonXY[i][3]) and ((selx >= buttonXY[i][1]) and (selx <= buttonXY[i][2])) then
+
+                    local transmitList = {{computerAddresses[i]}, GDO}
+
+
+                    modem.transmit(5572, 1237, transmitList) -- transmitting address to gate fro dialling
+                    destAddressname = computerNames[i]
+                    destAddress = computerAddresses[i]
+                    dialing = true
+                    sely = (0)
+                    selx = (0)
+                    local endcode = parallel.waitForAny(GetClick, Netdisconnect)
+                    if endcode == 1 then
+                        disconcode()
+                    end
+
+
+                elseif sely >= 17 and selx >= 23 then
+
+                    selecting = false
+                    sely = (0)
+                    selx = (0)
+
+                end
+            end
+        else 
+            for i = 1, #buttonXY do
+                if (cursY == buttonXY[i][3]) and ((cursX >= buttonXY[i][1]) and (cursX <= buttonXY[i][2])) then
+
+                    local transmitList = {{computerAddresses[i]}, GDO}
+
+                    dialing = true
+                    modem.open(8750)
+                    modem.transmit(5572, 1237, transmitList)
+                    mon.setCursorPos(10,10)
+                    mon.clear()
+                    mon.write("dialing gate")
+                    while dialing == true do
+                        modem.open(1237)
+                        local number, gatedistance = simplerecieve()
+                        if number == 0 and ((distance <= 64)and (distance ~= nil)) then
+                            modem.close(1237)
+                            dialing = false
+                            mon.setCursorPos(10,10)
+                            mon.clear()
+                            mon.write("dialing gate")
+                            mon.setCursorPos(10,11)
+                            mon.write("cheveron")
+                            mon.setCursorPos(10,12)
+                            mon.write(number)
+                            mon.setCursorPos(10,13)
+                            mon.write("locked")
+                        elseif number ~= 0 and ((distance <= 64)and (distance ~= nil)) then
+                            mon.setCursorPos(10,10)
+                            mon.clear()
+                            mon.write("dialing gate")
+                            mon.setCursorPos(10,11)
+                            mon.write("cheveron")
+                            mon.setCursorPos(10,12)
+                            mon.write(number)
+                            mon.setCursorPos(10,13)
+                            mon.write("engaged")
+                        end
+
+                        DialText()
+
+                        local endcode = parallel.waitForAny(GetClick, Netdisconnect)
+                        if endcode == 1 then
+                            disconcode()
+                        end
+                    end
+                    term.clear()
+                    term.setCursorPos(10,10)
+                    term.write()
+                    selAdress = computerNames[i]
+                    sleep(5)
+                    cursX = 0
+                    cursY= 0
+                elseif cursY >= 17 and cursX >= 20 then
+                    selecting = false
+                end
+            end
+        end
+
+        buttonXY = nil
+        computerAddresses = nil
+        computerNames = nil
+        
+    end
+    return dialing
+end
+
+local function TermDraw(list) --tablets side: draws selection options on the terminal
+    local x = 0
+    local y = -1
+    local x1 = 0
+    local x2 = 0
+    local internaladdress = {}
+
+    for i = 1,#list do
+        if i % 2 == 0 then
+            x = 15
+        else
+            x = 2
+            y = y + 2
+        end
+        term.setCursorPos(x,y)
+
+
+
+        term.write(list[i][1])
+
+        x1 = x
+        x2 = x + 9
+
+        table.insert(buttonXY, {x1,x2,y})
+
+        table.insert(computerNames, list[i][1])
+
+        local addresstranslate = list[i]
+        for i = 2, #addresstranslate do 
+            table.insert(internaladdress, addresstranslate[i])
+        end
+        table.insert(computerAddresses, internaladdress)
+        internaladdress = {}
+    end
+
+    paintutils.drawFilledBox(20,17,26,19,colors.red)
+    term.setCursorPos(21,18)
+    term.write("Back")
+
+end
+
+local function tabSelector() --using tabselector , termdraw and screenwrite manages the menues for both monitor and tablet
+                             --this also initialises the paradial sequence to send informatiuon to the gate
     
 
     local state = true
     
-    if pocket == true then
+    if pocket == true then -- code fot the tablets
         while state == true do
+
+            selectionTabs()
+
             if (taby >= 2) and (taby <= 7) and ((tabx >= 2) and (tabx <= 14)) then
 
                 if #MainGates ~= 0 then
@@ -343,7 +546,7 @@ local function tabSelector()
 
                     TermDraw(MainGates)
 
-                    local returnstate = SelectSend()
+                    local returnstate = ParaDial()
 
                     if returnstate == true then
                         state = false
@@ -367,7 +570,7 @@ local function tabSelector()
 
                     TermDraw(playerGates, colours.green)
 
-                    local returnstate = SelectSend()
+                    local returnstate = ParaDial()
 
                     if returnstate == true then
                         state = false
@@ -390,7 +593,7 @@ local function tabSelector()
 
                     TermDraw(hazardGates)
 
-                    local returnstate = SelectSend()
+                    local returnstate = ParaDial()
 
                     if returnstate == true then
                         state = false
@@ -413,7 +616,7 @@ local function tabSelector()
 
                     TermDraw(privateGates)
 
-                    local returnstate = SelectSend()
+                    local returnstate = ParaDial()
 
                     if returnstate == true then
                         state = false
@@ -429,7 +632,7 @@ local function tabSelector()
                 end
             end
         end
-    else
+    else -- code for the monitors
         while state == true do
             mon.setBackgroundColor(colors.black)
             mon.clear()
@@ -541,107 +744,13 @@ local function tabSelector()
     return 1
 end
 
-local function PRIMARYDialingOut() -- what it says
-    totalstate = true
-    local PDO = 0
-   
-    PDO = parallel.waitForAny(tabSelector, Netdisconnect)
-    
-
-    if (PDO == 1) and totalstate == true then
-
-        sleep(1)
-
-        os.pullEvent(stargate_outgoing_wormhole)
-        
-        DialText()
-
-        if (gate.isStargateConnected() == true) then
-            
-            PDO = parallel.waitForAny(DisconnectCheck, ParaDisconnect, Paratimeout)
-            dialing = false
-        else 
-        end
-    end
-    computerAddresses = {}
-    computerNames = {}
-
-        
-end
-
-
-local function ParaDial() -- seperating touch dialing so timeout function can work
-
-    local selecting = true
-    while dialing == false and selecting == true do
-
-        selx, sely = GetClick()
-        if pocket == false then
-            for i = 1, #buttonXY do
-
-                if (sely == buttonXY[i][3]) and ((selx >= buttonXY[i][1]) and (selx <= buttonXY[i][2])) then
-
-                    modem.transmit(5572, 1237, computerAddresses[i]) -- transmitting address to gate fro dialling
-                    destAddressname = computerNames[i]
-                    destAddress = computerAddresses[i]
-                    dialing = true
-                    sely = (0)
-                    selx = (0)
-
-                elseif sely >= 17 and selx >= 23 then
-
-                    selecting = false
-                    sely = (0)
-                    selx = (0)
-
-                end
-            end
-        else 
-            if (cursY == buttonXY[i][3]) and ((cursX >= buttonXY[i][1]) and (cursX <= buttonXY[i][2])) then
-
-                
-                dialing = true
-                modem.open(8750)
-                modem.transmit(1327, 8750, computerAddresses[i])
-                term.setCursorPos(10,10)
-                term.clear()
-                term.write("dialing gate")
-                while dialing == true do
-                    modem.open(1237)
-                    local number, gatedistance = simplerecieve()
-                    if number == 0 and ((distance <= 64)and (distance ~= nil)) then
-                        modem.close(1237)
-                        dialling = false
-                    end
-                end
-                term.clear()
-                term.setCursorPos(10,10)
-                term.write()
-                selAdress = computerNames[i]
-                sleep(5)
-                cursX = 0
-                cursY= 0
-            elseif cursY >= 17 and cursX >= 20 then
-                selecting = false
-            end
-        end
-
-        buttonXY = nil
-        computerAddresses = nil
-        computerNames = nil
-        
-    end
-    return dialing
-end
-
-
-
-
-
-
-
 local function infoRequester(HP, PP, gateName, dialRequest, info)
 
+end
+
+local function PRIMARYDialingOut()
+
+    tabSelector()
 
 end
 
@@ -665,7 +774,10 @@ local function Main() -- main program operating the application
                 PRIMARYDialingOut()
             else
                 if incomingSignal == 421732 then
-                -- incoming wormhole function here
+                    
+
+                    incomingCode()
+                    
                 end
             end
         end

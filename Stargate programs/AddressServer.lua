@@ -16,7 +16,7 @@ local MainGates = {
     {"minecraft:the_end",               "End",         13,24,2,19,3,30,0},            --theEnd
     {"sgjourney:abydos",                "Abydos",      26,6,14,31,11,29,0},           --abidos
     {"sgjourney:chulak",                "Chulak",      11,22,18,9,34,21,14,23,0},     --chulak
-    {"sgjourney:lantea",                "Atlantis",    18,20,1,15,14,7,19,0},          --lanteaAddress
+    {"sgjourney:lantea",                "Atlantis",    18,20,1,15,14,7,19,0},         --lanteaAddress
     {"ad_astra:glacio",                 "Glacio",      3,14,31,23,17,33,26,28,0},     --glacio
     {"allthemodium:mining",             "Mining",      16,7,9,29,5,1,0},              --miningdim
     {"allthemodium:the_other",          "Other",       34,14,25,35,17,33,0},          --theOther
@@ -28,8 +28,7 @@ local MainGates = {
     {"blue_skies:everdawn",             "Everdusk",    21,25,8,35,3,1,0},             --everdusk
     {"deeperdarker:otherside",          "otherSide",   23,11,21,10,26,31,0},          --otherSide
     {"mahoutsukai:reality_marble",      "marble",      25,34,29, 30,5,15,0},          --marble
-    {"lostcities:lostcity",             "lostCity",    25,5,32,35,23,2,0},            --lostCity
-     
+    {"lostcities:lostcity",             "lostCity",    25,5,32,35,23,2,0},            --lostCity  
 }
 
 -- player gate addresses
@@ -42,27 +41,27 @@ local playerGates = {
 
 -- hazard gate addresses
 local hazardGates = {
-    {"haz", "Moon",        33,18,28,15,22,16,9,13,0},     --moon
-    {"haz", "mars",        6,8,25,28,33,12,30,35,0},      --mars
-    {"haz", "Venus",       34,17,21,6,15,27,5,30,0},      --venus
-    {"haz", "Mercury",     23,4,18,5,31,1,2,22,0}         --mercury 
+    {"haz", "Moon",      33,18,28,15,22,16,9,13,0},       --moon
+    {"haz", "mars",      6,8,25,28,33,12,30,35,0},        --mars
+    {"haz", "Venus",     34,17,21,6,15,27,5,30,0},        --venus
+    {"haz", "Mercury",   23,4,18,5,31,1,2,22,0}           --mercury 
 }
 
 -- personal gate addresses
 local privateGates = {
-    {10, "Mcolony",     6,10,25,11,30,15,28,4,0},         --Mysts's colony
-    {10, "reactor",     9,24,35,17,26,20,28,22,0},        --Reactor room
-    {10, "TARIDS",      24,20,15,23,6,12,1,19,0},         -- MYST TARDIS
+    {10, "Mcolony",      6,10,25,11,30,15,28,4,0},        --Mysts's colony
+    {10, "reactor",      9,24,35,17,26,20,28,22,0},       --Reactor room
+    {10, "TARIDS",       24,20,15,23,6,12,1,19,0},        -- MYST TARDIS
 }
 
 local function pararecieve() -- function to make modem message events simpler
-    _,_,_,reply,signal,_ = os.pullEvent("modem_message")
+    local _,_,_,reply,signal,_ = os.pullEvent("modem_message")
     return signal, reply
 end
 
-local tempMAIN = nil
-local tempPLAYER = nil
-local tempHAZARD = nil
+local tempMAIN    = nil
+local tempPLAYER  = nil
+local tempHAZARD  = nil
 local tempPRIVATE = nil
 
 -- recieve info == 1329
